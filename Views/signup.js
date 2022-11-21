@@ -25,14 +25,12 @@ const response=await axios.post("http://localhost:3000/signup",obj)
 if (response.status === 201){
     console.log('success');
     alert('Signup sucessfull')
-    // window.location.href='../login/login.html'
+    window.location.href="./login.html"
 }else{
     passwordInput.value='';
     console.log('bye')
 }
 }
-
-
 
 catch(err){
     if(err.response.status == 409){
