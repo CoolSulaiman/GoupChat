@@ -22,3 +22,15 @@ try {
 }
 
 }
+
+exports.getMessage = async(req,res,next)=>{
+    try {
+        const data =await Chat.findAll({where:{userId:req.user.id}})
+        const userName=req.user.name
+        res.status(200).json({data, userName})
+        
+    } catch (err) {
+        res.status(500).json({message:'unable to get chats'})
+    }
+
+}
