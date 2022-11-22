@@ -4,6 +4,7 @@ const cors = require('cors')
 const sequelize = require('./util/database')
 require('dotenv').config()
 const User = require('./models/user');
+const Chat = require('./models/Chat')
 
 const userRouter = require('./routes/user');
 
@@ -17,9 +18,14 @@ app.use(bodyParser.json({extended:false}))
 
 app.use(userRouter)
 
+User.hasMany(Chat)
+Chat.belongsTo(User)
+
+
 sequelize
 .sync()
-// .sync({force:start})
+// .sync({force:true})
+
 .then(()=>{
     app.listen(3000);
 })

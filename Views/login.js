@@ -19,6 +19,8 @@ try {
 const response= await axios.post("http://localhost:3000/login",obj)
     console.log(response)
     if (response.status === 200){
+        console.log(response.data.token)
+        localStorage.setItem('Usertoken',response.data.token)
         alert('User login success')
         window.location.href =" Chat/chat.html";
 
