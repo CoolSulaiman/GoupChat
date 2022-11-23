@@ -5,8 +5,12 @@ const sequelize = require('./util/database')
 require('dotenv').config()
 const User = require('./models/user');
 const Chat = require('./models/Chat')
+const UserGroup=require('./models/userGroup')
+const Group=require('./models/group')
 
 const userRouter = require('./routes/user');
+const groupRouter = require('./routes/group')
+const messageRouter = require('./routes/message');
 
 const app = express();
 
@@ -17,10 +21,18 @@ app.use(bodyParser.json({extended:false}))
 
 
 app.use(userRouter)
+app.use('/group',groupRouter)
+app.use(messageRouter)
 
 User.hasMany(Chat)
 Chat.belongsTo(User)
 
+Group.hasMany(Chat);
+Chat.belongsTo(Group);
+
+
+User.belongsToMany(Group,{through:UserGroup})
+Group.belongsToMany(User,{through:UserGroup})
 
 sequelize
 .sync()

@@ -19,10 +19,11 @@ try {
 const response= await axios.post("http://localhost:3000/login",obj)
     console.log(response)
     if (response.status === 200){
-        console.log(response.data.token)
+        console.log(response.data)
         localStorage.setItem('Usertoken',response.data.token)
+        localStorage.setItem('name' , response.data.name)
         alert('User login success')
-        window.location.href =" Chat/chat.html";
+        window.location.href =" group/group.html";
 
     }else{
         passInput.value='';
