@@ -7,10 +7,12 @@ exports.getGroups= async(req,res,next)=>{
 
     try {
         // let data = await req.user.getGroups()
+        console.log("bb")
 
         let groups = await Usergroup.findAll({where:{userId:req.user.id}})
-        console.log(groups,"jj")
         let data = []
+        console.log("jjllllllllllllllllhhhhhhhhhhh")
+
         for(let i = 0 ; i< groups.length ; i++){
             let group = await Group.findByPk(groups[i].groupId);
             data.push(group);
@@ -25,13 +27,14 @@ exports.getGroups= async(req,res,next)=>{
 }
 
 exports.createGroup = async(req,res,next)=>{
+    console.log(req.body,"loplpp---------------------000")
 
     const{group} = req.body ;
     try {
         if(!group){
             res.status(404).json({message:"no name entered"})
         }
-        let data = await req.user.createGroup({name:group})
+        let data = await req.user.createGroup({name:group} , {through: {isAdmin:true}})
         // let data =await Group.create(
         //     {name:group,userId:req.user.id}
         // )

@@ -3,6 +3,8 @@ const messageInput=document.getElementById('message')
 const logoutt=document.getElementById('logout')
 const userParent = document.getElementById('group');
 
+const admin = JSON.parse(localStorage.getItem('isAdmin'));
+
 const groupId = localStorage.getItem('groupId');
 const groupName = localStorage.getItem('groupName');
 
@@ -17,9 +19,37 @@ window.addEventListener('DOMContentLoaded', loadScreen)
 async function loadScreen(e){
     e.preventDefault();
     document.getElementById('username').innerHTML = groupName
-    // console.log(groupId)
+    isAdmin(groupId)
     getMessage(groupId)
     getUsers(groupId);
+
+    if(admin){
+        document.getElementById('add-user').classList.add('admin')
+        console.log("im admin")
+
+    }
+}
+
+
+
+
+async function isAdmin(groupId){
+    try {
+        let response = await axios.get(`http://localhost:3000/group/isAdmin/${groupId}`  , {headers:{"Authorization" : token}})
+        // console.log(response.data)
+        localStorage.setItem('isAdmin' , response.data)
+
+        if(JSON.parse(localStorage.getItem('isAdmin'))){
+            document.getElementById('add-user').classList.add('admin') 
+        }
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+
+
+
 
 
 async function getMessage(groupId){
@@ -51,7 +81,7 @@ async function getMessage(groupId){
     // },1000)
 }
 
-}
+
 
 function saveToLocal(arr){
 
@@ -96,7 +126,7 @@ function showChatsOnScreen(){
               <div class="received" id=${chat.id}>
                 <p class="received-name">${chat.name}</p>
                 <p class="received-msg">${chat.message}</p>
-               
+                <p class="sent-time">${chat.createdAt.split('T')[1].slice(0,5)}</p>
               </div>
             </div>
           </div>`
@@ -143,22 +173,125 @@ document.getElementById('chat-form').onsubmit = async function(e){
 async function getUsers(groupId){
     try {
         console.log('sdfsdfsdfsdfsdfsdf')
-        let response = await axios.get(`http://localhost:3000/group/fetch-users/${groupId}`  , {headers:{"Authorization" : token}})
+        let response = await axios.get(`http://localhost:3000/group/fetch-users/${groupId}` , {headers:{"Authorization" : token}})
         console.log(response.data,"kk");
 
-        response.data.forEach( data => addGroupUsersToScreen(data))
+        let admi = JSON.parse(localStorage.getItem('isAdmin'));
+        if(admi){
+              response.data.forEach( data => addGroupUsersToScreen(data))
+        }else{
+          response.data.forEach( data => addGroupUsersToScreenNotAdmin(data))
+        }
     } catch (err) {
 
     }
 }
 
+
+
 function addGroupUsersToScreen(data){
-    let child = `<div style="width:100%;color:white" class="group-style">
+    let child = `<div style="width:100%;color:white" class="group-style" id=${data.id}>
     <button class="user-btn">${data.name}</button>
-    <button class="add-user" >+</button>
-    <button class="remove-user">-</button>
-    <button class="delete-group">r</button>
+    <div class="admin-buttons">
+    <button class="add-user" onclick="makeAdmin('${data.id}')">+</button>
+    <button class="remove-user" onclick="removeAdmin('${data.id}')">-</button>
+    <button class="delete-group" onclick="removeUser('${data.id}')" >r</button>
+    </div>
   </div>`
 
   userParent.innerHTML += child
+
+}
+
+function addGroupUsersToScreenNotAdmin(data){
+    let child = `<div style="width:100%;color:white" class="group-style" id=${data.id}>
+    <button class="user-btn">${data.name}</button>
+  </div>`
+
+  userParent.innerHTML += child
+}
+
+
+async function removeUser(userId){
+    const details = {
+        userId,
+        groupId
+    }
+    console.log(details )
+    try {
+        let response = await axios.post(`http://localhost:3000/group/remove-user` ,details  , {headers:{"Authorization" : token}})
+        // console.log(response.data.user);
+        alert('removed user succesfully');
+        removeUserFromScreen(response.data.user)
+    } catch (err) {
+        if(err.response.status == 402){
+            alert('Only admin can delete')
+        }if(err.response.status == 404){
+            alert('no group or user found')
+        }
+    }
+}
+
+async function makeAdmin(userId){
+    console.log('make   adminnnnnnnnnn')
+    const details = {
+        userId,
+        groupId
+    }
+    console.log(details )
+    try {
+        let response = await axios.post(`http://localhost:3000/group/makeAdmin` ,details  , {headers:{"Authorization" : token}})
+        console.log(response);
+        alert('user is admin now');
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+async function removeAdmin(userId){
+    console.log('make   adminnnnnnnnnn')
+    const details = {
+        userId,
+        groupId
+    }
+    console.log(details )
+    try {
+        let response = await axios.post(`http://localhost:3000/group/removeAdmin` ,details  , {headers:{"Authorization" : token}})
+        console.log(response);
+        alert('removed admin');
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+function removeUserFromScreen(user){
+
+    const child = document.getElementById(`${user.id}`)
+    userParent.removeChild(child)
+}
+
+document.getElementById('form-group').onsubmit = async function(e){
+    e.preventDefault();
+    const details = {
+        email : e.target.email.value,
+        groupId : groupId
+    }
+
+    try {
+        let response = await axios.post(`http://localhost:3000/group/addUser`  ,details ,  {headers:{"Authorization" : token}})
+
+        addGroupUsersToScreen(response.data.user)
+        alert('user added successfully')
+        document.querySelector('.groupName').value =" "
+
+    } catch (err) {
+        if(err.response.status == 401){
+            alert("user already in group")
+        }if(err.response.status == 400){
+            alert("enter email")
+        }if(err.response.status == 404){
+            alert("user not found")
+        }
+
+    }
 }

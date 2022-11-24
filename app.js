@@ -18,6 +18,10 @@ app.use(express.json())
 app.use(cors());
 app.use(bodyParser.json({extended:false}))
 
+User.belongsToMany(Group,{through:UserGroup})
+Group.belongsToMany(User,{through:UserGroup})
+
+
 
 
 app.use(userRouter)
@@ -30,9 +34,6 @@ Chat.belongsTo(User)
 Group.hasMany(Chat);
 Chat.belongsTo(Group);
 
-
-User.belongsToMany(Group,{through:UserGroup})
-Group.belongsToMany(User,{through:UserGroup})
 
 sequelize
 .sync()

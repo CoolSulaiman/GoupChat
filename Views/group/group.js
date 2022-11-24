@@ -17,7 +17,7 @@ async function loadScreen(e){
     e.preventDefault();
 
     document.getElementById('welcomename').innerHTML = `${username.split(' ')[0]}`
-    // console.log(token)
+    console.log("mmmmmmmmmmmmmmmmmmm")
     try {
         let response = await axios.get('http://localhost:3000/group/getgroups' , {headers:{'Authorization':token}});
 
@@ -58,7 +58,7 @@ console.log(group)
         const response = await axios.post('http://localhost:3000/group/create-group' ,group , {headers:{'Authorization':token}});
         console.log(response,"aa gaiya")
         loadScreen(e)
-
+        // e.target.group.value = ""
     } catch (err) {
         console.log(err);
     }
